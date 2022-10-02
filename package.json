@@ -3,11 +3,10 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "node server.js",
-    "dev": "ng serve",
+    "start": "ng serve",
     "build": "ng build",
+    "gh-build": "ng build --configuration github --base-href /front_construct_calc",
     "watch": "ng build --watch --configuration development",
-    "heroku-post-build": "ng build --prod",
     "test": "ng test"
   },
   "private": true,
