@@ -24,5 +24,5 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
-          branch: gh-pages # The branch the action should deploy to. test
+          branch: gh-pages # The branch the action should deploy to. test rt
           folder: front_construct_calc/dist/front_construct_calc # The folder the action should deploy.        
