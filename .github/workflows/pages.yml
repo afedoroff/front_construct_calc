@@ -1,63 +1,43 @@
-name: Github Pages Deploy
-
-on:
-  push:
-    branches:
-      - "main"
+version: 2
 
 jobs:
-  Deploy:
-    runs-on: ubuntu-latest
+  build:
+    environment:
+      GITHUB_ORG: https://github.com/angular-schule
+      GITHUB_NAME: The Buildbot
+      GITHUB_EMAIL: buildbot@angular2buch.de
+      NAME: angular-cli-ghpages
 
-    strategy:
-      matrix:
-        node-version: [14.x]
-    
+    docker:
+      - image: circleci/node:14-browsers
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
+      - checkout
 
-      - name: Install and Build
-        working-directory: ./
-        run: npm install && npm run gh-build && cp dist/front_construct_calc/index.html dist/front_construct_calc/404.html
-      
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.1
-        with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: dist/front_construct_calc # The folder the action should deploy.        
+      - restore_cache:
+          key: dependency-cache-{{ checksum "src/package.json" }}
+      - run: cd src && npm i --silent
+      - save_cache:
+          key: dependency-cache-{{ checksum "src/package.json" }}
+          paths:
+            - src/node_modules
+      - run: cd src && npm run build
+      - run: cd src && npm run test
+      - run: cd src/dist && sudo npm link
 
-# name: GitHub Pages
+      - run: sudo -E npm install -g @angular/cli@next
+      - run: sudo -E ng new your-angular-project --defaults
+      - run: cd your-angular-project && sudo -E npm link angular-cli-ghpages
+      - run: cd your-angular-project && sudo -E ng add angular-cli-ghpages
+      - run: cd your-angular-project && sudo -E ng deploy --repo="$GITHUB_ORG/$NAME.git" --name="$GITHUB_NAME" --email="$GITHUB_EMAIL" --cname=angular-cli-ghpages.angular.schule
 
-# on:
-#   push:
-#     branches:
-#     - main
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - name: Checkout
-#       uses: actions/checkout@v2
-
-#     - name: Setup Node.js
-#       uses: actions/setup-node@v2
-#       with:
-#         node-version: '14.18.0'
-
-#     - name: Install dependencies
-#       run: npm install
-
-#     # - name: Run tests
-#     #   run: npm run test:headless
-
-#     - name: Build
-#       run: npm run build
-
-#     - name: Deploy
-#       if: success()
-#       uses: JamesIves/github-pages-deploy-action@4.1.1
-#       with:
-#         branch: gh-pages # The branch the action should deploy to.
-#         folder: ./dist/test1 # The folder the action should deploy. 
+workflows:
+  version: 2
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - main
