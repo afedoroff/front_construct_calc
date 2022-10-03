@@ -19,7 +19,7 @@ jobs:
 
       - name: Install and Build
         working-directory: ./
-        run: npm install && npm run prod && cp dist/front_construct_calc/index.html dist/front_construct_calc/404.html
+        run: npm install && npm run gh-build && cp dist/front_construct_calc/index.html dist/front_construct_calc/404.html
       
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.1
